@@ -1,10 +1,4 @@
-// pubはこのsort関数が他のモジュールからアクセスできることを示す
-// 引数 x の型 &mut [u32] について
-//   &は値をポインタ経由で借用することを示す(借用については7章)
-//   mut は値が変更可能であることを示す
-//   u32 は32ビット符号なし整数
-//   [u32] はu32のスライス
-pub fn sort(x: &mut [u32], up: bool) {
+pub fn sort<T: Ord>(x: &mut [T], up: bool) {
     if x.len() > 1 {
         // Python 実装とはことなり、x を直接操作している。
         let mid_point = x.len() / 2;
@@ -14,7 +8,7 @@ pub fn sort(x: &mut [u32], up: bool) {
     }
 }
 
-fn sub_sort(x: &mut [u32], up: bool) {
+fn sub_sort<T: Ord>(x: &mut [T], up: bool) {
     if x.len() > 1 {
         compare_and_swap(x, up);
         let mid_point = x.len() / 2;
@@ -23,7 +17,7 @@ fn sub_sort(x: &mut [u32], up: bool) {
     }
 }
 
-fn compare_and_swap(x: &mut [u32], up: bool) {
+fn compare_and_swap<T: Ord>(x: &mut [T], up: bool) {
     let mid_point = x.len() / 2;
     for i in 0..mid_point {
         if (x[i] > x[mid_point + i]) == up {
@@ -33,10 +27,8 @@ fn compare_and_swap(x: &mut [u32], up: bool) {
     }
 }
 
-// このモジュールは cargo test を実行したときのみコンパイルされる
 #[cfg(test)]
 mod tests {
-    // 親モジュール (first) のsort関数を使用する
     use super::sort;
 
     #[test]
@@ -60,5 +52,63 @@ mod tests {
         let mut x: Vec<u32> = vec![10, 30, 11, 20, 4, 330, 21, 110];
         sort(&mut x, false);
         assert_eq!(x, vec![330, 110, 30, 21, 20, 11, 10, 4])
+    }
+
+    #[test]
+    fn sort_str_ascending() {
+        // 文字列のベクタを作り、ソートする
+        let mut x = vec![
+            "Rust",
+            "is",
+            "fast",
+            "and",
+            "memory-efficient",
+            "with",
+            "no",
+            "GC",
+        ];
+        sort(&mut x, true);
+        assert_eq!(
+            x,
+            vec![
+                "GC",
+                "Rust",
+                "and",
+                "fast",
+                "is",
+                "memory-efficient",
+                "no",
+                "with"
+            ]
+        );
+    }
+
+    #[test]
+    fn sort_str_descending() {
+        // 文字列のベクタを作り、ソートする
+        let mut x = vec![
+            "Rust",
+            "is",
+            "fast",
+            "and",
+            "memory-efficient",
+            "with",
+            "no",
+            "GC",
+        ];
+        sort(&mut x, false);
+        assert_eq!(
+            x,
+            vec![
+                "with",
+                "no",
+                "memory-efficient",
+                "is",
+                "fast",
+                "and",
+                "Rust",
+                "GC",
+            ]
+        );
     }
 }
