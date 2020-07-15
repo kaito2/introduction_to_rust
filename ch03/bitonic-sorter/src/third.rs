@@ -78,6 +78,7 @@ where
 mod tests {
     use super::sort;
     use super::sort_by;
+    use crate::utils::{is_sorted_ascending, is_sorted_descending, new_u32_vec};
     use crate::SortOrder::*;
 
     #[test]
@@ -257,5 +258,22 @@ mod tests {
 
         // 結果を検証
         assert_eq!(x, expected);
+    }
+
+    #[test]
+    fn sort_u32_large() {
+        {
+            // 乱数で 65,536 要素のデータ列を作る(65,536 は 2 の 16 乗)
+            let mut x = new_u32_vec(65536);
+            // 昇順にソートする
+            assert_eq!(sort(&mut x, &Ascending), Ok(()));
+            // ソート結果が正しいことを検証する
+            assert!(is_sorted_ascending(&x));
+        }
+        {
+            let mut x = new_u32_vec(65536);
+            assert_eq!(sort(&mut x, &Descending), Ok(()));
+            assert!(is_sorted_descending(&x));
+        }
     }
 }
